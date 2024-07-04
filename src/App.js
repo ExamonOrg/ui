@@ -1,14 +1,13 @@
 import "./App.css";
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-
+import "bootstrap/dist/css/bootstrap.min.css";
 
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import ButtonGroup from "react-bootstrap/ButtonGroup";
 
 import Nav from "react-bootstrap/Nav";
 import NavDropdown from "react-bootstrap/NavDropdown";
@@ -20,6 +19,31 @@ import NavigationBar from "./components/NavigationBar";
 
 import { useState, useEffect } from "react";
 
+import { Sheet } from "react-modal-sheet";
+
+import CloseButton from "react-bootstrap/CloseButton";
+
+function MySheet(props) {
+  const [isOpen, setOpen] = useState(false);
+
+  return (
+    <Sheet
+      isOpen={props.isOpen}
+      onClose={() => setOpen(false)}
+      detent="content-height"
+    >
+      <Sheet.Container>
+        <Sheet.Content>
+          <Sheet.Scroller>
+            <CloseButton></CloseButton>
+            <div style={{ height: 400 }}>Here is the help content</div>
+          </Sheet.Scroller>
+        </Sheet.Content>
+      </Sheet.Container>
+    </Sheet>
+  );
+}
+
 function App() {
   const [data, setData] = useState(null);
   const [index, setIndex] = useState(0);
@@ -29,9 +53,7 @@ function App() {
   const [choices, setChoices] = useState([]);
   const [answer, setAnswer] = useState(null);
   const [codeStyle, setCodeStyle] = useState(styles["pojoaque"]);
-
-
-
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     fetch("/data.json")
@@ -73,7 +95,9 @@ function App() {
   function tooHard() {
     handleNext();
   }
-  function helpMe() {}
+  function helpMe() {
+    setIsOpen(true);
+  }
 
   return (
     <div className="App">
@@ -84,19 +108,30 @@ function App() {
               title="Code Style"
               id={`offcanvasNavbarDropdown-expand-xl`}
             >
-              {
-                Object.keys(styles).map(k => {
-                  return <NavDropdown.Item key={k} onClick={() => setCodeStyle(styles[k])}>
+              {Object.keys(styles).map((k) => {
+                return (
+                  <NavDropdown.Item
+                    key={k}
+                    onClick={() => setCodeStyle(styles[k])}
+                  >
                     {k}
                   </NavDropdown.Item>
-                })
-              }
+                );
+              })}
             </NavDropdown>
             <ButtonGroup aria-label="Basic example">
-              <Button variant="outline-secondary" size="sm" onClick={handlePrevious}>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={handlePrevious}
+              >
                 Previous
               </Button>
-              <Button variant="outline-secondary" size="sm" onClick={handleNext}>
+              <Button
+                variant="outline-secondary"
+                size="sm"
+                onClick={handleNext}
+              >
                 Next
               </Button>
             </ButtonGroup>
@@ -107,14 +142,20 @@ function App() {
           <Col>What does the last print statement output?</Col>
           <Col>
             {tags.map((tag) => (
-              <Badge key={tag} bg="primary">{tag}</Badge>
+              <Badge key={tag} bg="primary">
+                {tag}
+              </Badge>
             ))}
           </Col>
         </Row>
 
         <Row>
           <Col>
-            <SyntaxHighlighter language="python" wrapLines={true} style={codeStyle}>
+            <SyntaxHighlighter
+              language="python"
+              wrapLines={true}
+              style={codeStyle}
+            >
               {code}
             </SyntaxHighlighter>
           </Col>
@@ -145,15 +186,10 @@ function App() {
         </Row>
 
         <Row>
-          <Col>
-          
-
-            
-          </Col>
-          <Col>
-            
-          </Col>
+          <Col></Col>
+          <Col></Col>
         </Row>
+        <MySheet isOpen={true} />
       </Container>
     </div>
   );
