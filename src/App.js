@@ -2,99 +2,66 @@ import "./App.css";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Badge from "react-bootstrap/Badge";
-import Button from "react-bootstrap/Button";
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-
-import Nav from "react-bootstrap/Nav";
-import NavDropdown from "react-bootstrap/NavDropdown";
-
-import SyntaxHighlighter from "react-syntax-highlighter";
-import { styles } from "./CodeStyles";
-
-import NavigationBar from "./components/NavigationBar";
-
 import { useState, useEffect } from "react";
 
-import { Sheet } from "react-modal-sheet";
+import Container from "react-bootstrap/Container";
+import Nav from "react-bootstrap/Nav";
 
-import CloseButton from "react-bootstrap/CloseButton";
+import OffCanvasNavigationBar from "./components/NavigationBar";
+import HelpSheet from "./components/HelpSheet";
+import Question from "./pages/Question";
+import Choices from "./pages/Choices";
+import Concepts from "./pages/help/concepts";
+import CodeAs from "./pages/help/CodeAs";
+import NextPrevQuestion from "./pages/NextPrevQuestion";
+import CodeStyle from "./components/CodeStyle";
+import Hints from "./pages/help/Hints";
+import FloatingButton from "./components/FloatingButton";
 
-function MySheet(props) {
-  const [isOpen, setOpen] = useState(false);
-
-  return (
-    <Sheet
-      isOpen={props.isOpen}
-      onClose={() => setOpen(false)}
-      detent="content-height"
-    >
-      <Sheet.Container>
-        <Sheet.Content>
-          <Sheet.Scroller>
-            <CloseButton></CloseButton>
-            <div style={{ height: 400 }}>Here is the help content</div>
-          </Sheet.Scroller>
-        </Sheet.Content>
-      </Sheet.Container>
-    </Sheet>
-  );
-}
+import { styles } from "./CodeStyles";
 
 function App() {
-  const [data, setData] = useState(null);
+  const [questionBank, setQuestionBank] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
   const [index, setIndex] = useState(0);
-
-  const [code, setCode] = useState(null);
-  const [tags, setTags] = useState([]);
-  const [choices, setChoices] = useState([]);
-  const [answer, setAnswer] = useState(null);
   const [codeStyle, setCodeStyle] = useState(styles["pojoaque"]);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/data.json")
+    fetch("/data2.json")
       .then((response) => response.json())
       .then((data) => {
-        setData(data);
-        setCode(data[index].function_src);
-        setTags(data[index].tags);
-        setChoices(data[index].choices);
-        setAnswer(data[index].correct_answer);
+        setQuestionBank(data);
+        setCurrentQuestion(data[0]);
       });
   }, []);
 
   function handleClick(event) {
     const choice = event.target.value;
-    if (choice === answer) {
-      alert("Correct!");
+    if (choice === currentQuestion.correct_answer) {
+      handleNext();
     } else {
-      alert("Incorrect!");
+      handleNext();
     }
   }
 
   function handleNext() {
+    if (index === questionBank.length - 1) {
+      return;
+    }
     setIndex(index + 1);
-    setCode(data[index].function_src);
-    setTags(data[index].tags);
-    setChoices(data[index].choices);
-    setAnswer(data[index].correct_answer);
+    setCurrentQuestion(questionBank[index]);
+    console.log(currentQuestion.hints);
   }
 
   function handlePrevious() {
+    if (index === 0) {
+      return;
+    }
     setIndex(index - 1);
-    setCode(data[index].function_src);
-    setTags(data[index].tags);
-    setChoices(data[index].choices);
-    setAnswer(data[index].correct_answer);
+    setCurrentQuestion(questionBank[index]);
   }
 
-  function tooHard() {
-    handleNext();
-  }
   function helpMe() {
     setIsOpen(true);
   }
@@ -102,94 +69,41 @@ function App() {
   return (
     <div className="App">
       <Container style={{ maxWidth: "460px" }}>
-        <NavigationBar>
+        <OffCanvasNavigationBar>
           <Nav className="justify-content-end flex-grow-1 pe-3">
-            <NavDropdown
-              title="Code Style"
-              id={`offcanvasNavbarDropdown-expand-xl`}
-            >
-              {Object.keys(styles).map((k) => {
-                return (
-                  <NavDropdown.Item
-                    key={k}
-                    onClick={() => setCodeStyle(styles[k])}
-                  >
-                    {k}
-                  </NavDropdown.Item>
-                );
-              })}
-            </NavDropdown>
-            <ButtonGroup aria-label="Basic example">
-              <Button
-                variant="outline-secondary"
-                size="sm"
-                onClick={handlePrevious}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline-secondary"
-                size="sm"
-                onClick={handleNext}
-              >
-                Next
-              </Button>
-            </ButtonGroup>
+            {/* <h2>Question: {currentQuestion && currentQuestion.unique_id}</h2> */}
+            <CodeStyle setCodeStyle={setCodeStyle} />
+            <NextPrevQuestion
+              handlePrevious={handlePrevious}
+              handleNext={handleNext}
+            />
           </Nav>
-        </NavigationBar>
-
-        <Row>
-          <Col>What does the last print statement output?</Col>
-          <Col>
-            {tags.map((tag) => (
-              <Badge key={tag} bg="primary">
-                {tag}
-              </Badge>
-            ))}
-          </Col>
-        </Row>
-
-        <Row>
-          <Col>
-            <SyntaxHighlighter
-              language="python"
-              wrapLines={true}
-              style={codeStyle}
-            >
-              {code}
-            </SyntaxHighlighter>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col>
-            <div className="d-grid gap-2">
-              <Button variant="secondary" size="lg" onClick={helpMe}>
-                Assist Me
-              </Button>
-              {choices.map((choice) => (
-                <Button
-                  key={choice}
-                  value={choice}
-                  variant="primary"
-                  size="lg"
-                  onClick={handleClick}
-                >
-                  {choice}
-                </Button>
-              ))}
-              <Button variant="danger" size="lg" onClick={tooHard}>
-                Too Hard
-              </Button>
-            </div>
-          </Col>
-        </Row>
-
-        <Row>
-          <Col></Col>
-          <Col></Col>
-        </Row>
-        <MySheet isOpen={true} />
+        </OffCanvasNavigationBar>
+        {currentQuestion && (
+          <>
+            <Question
+              tags={currentQuestion.tags}
+              code={currentQuestion.function_src}
+              codeStyle={codeStyle}
+            />
+            <Choices
+              choices={currentQuestion.choices}
+              handleClick={handleClick}
+            />
+            <HelpSheet isOpen={isOpen} callback={() => setIsOpen(false)}>
+              {/* <Concepts /> */}
+              <CodeAs
+                language="javascript"
+                codeStyle={codeStyle}
+                code={currentQuestion.alternativeLanguage}
+              />
+              <Hints
+                hints={currentQuestion.hints}
+              />
+            </HelpSheet>
+          </>
+        )}
+        <FloatingButton onClick={helpMe} />
       </Container>
     </div>
   );

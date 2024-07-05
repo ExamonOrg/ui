@@ -192,7 +192,6 @@ const styles = {
 "xcode": xcode,
 "xt256": xt256,
 "zenburn": zenburn,
-"pojoaque": pojoaque
 }
 
 export { styles };
