@@ -8,6 +8,7 @@ Embed Youtube
 Run code (add pyiode)
 Print logs
 
+# todos
 UI
 Set Experience Level
 * Coded previously
@@ -20,9 +21,9 @@ Set Experience Level
 * No Experience
 
 Select Topics of Interest
-* Music: Michael Jackson, Taylor Swift
-* Movies: Star Wars, Harry Potter
-* TV Shows: Friends, The Office
+* Music
+* Movies
+* TV Shows
 
 
 
